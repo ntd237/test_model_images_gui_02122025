@@ -217,7 +217,7 @@ class MainWindow(QMainWindow):
         # === BATCH PROCESSING BUTTON ===
         self.btn_batch_processing = QPushButton("📁 Batch Processing")
         self.btn_batch_processing.setMinimumHeight(35)
-        self.btn_batch_processing.setEnabled(False)
+        self.btn_batch_processing.setEnabled(True)  # Always enabled - model can be loaded in dialog
         self.btn_batch_processing.clicked.connect(self.open_batch_processing)
         layout.addWidget(self.btn_batch_processing)
         
@@ -447,9 +447,6 @@ class MainWindow(QMainWindow):
         
         # Update status
         self._update_run_button_state()
-        
-        # Enable batch processing button
-        self.btn_batch_processing.setEnabled(True)
     
     def run_inference(self):
         """Chạy inference với model và ảnh hiện tại"""
