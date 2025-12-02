@@ -80,7 +80,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("YOLO Model Testing Tool")
-        self.setGeometry(100, 100, 1400, 900)
+        self.setGeometry(100, 100, 1400, 950)
         
         # Initialize components
         self.model_loader = ModelLoader()
@@ -122,7 +122,7 @@ class MainWindow(QMainWindow):
         
         # Detection results area
         results_panel = self.create_results_panel()
-        right_layout.addWidget(results_panel, stretch=1)
+        right_layout.addWidget(results_panel, stretch=2)
         
         main_layout.addWidget(right_panel, stretch=1)
         
@@ -149,6 +149,7 @@ class MainWindow(QMainWindow):
         image_layout = QVBoxLayout(image_group)
         
         self.btn_load_image = QPushButton("📁 Load Ảnh")
+        self.btn_load_image.setMinimumHeight(35)
         self.btn_load_image.clicked.connect(self.load_image)
         image_layout.addWidget(self.btn_load_image)
         
@@ -162,6 +163,7 @@ class MainWindow(QMainWindow):
         model_layout = QVBoxLayout(model_group)
         
         self.btn_load_model = QPushButton("🧠 Load Model")
+        self.btn_load_model.setMinimumHeight(35)
         self.btn_load_model.clicked.connect(self.load_model)
         model_layout.addWidget(self.btn_load_model)
         
@@ -205,7 +207,7 @@ class MainWindow(QMainWindow):
         self.btn_run_inference.setObjectName("successButton")
         self.btn_run_inference.setEnabled(False)
         self.btn_run_inference.clicked.connect(self.run_inference)
-        self.btn_run_inference.setMinimumHeight(50)
+        self.btn_run_inference.setMinimumHeight(35)
         font = self.btn_run_inference.font()
         font.setPointSize(14)
         font.setBold(True)
@@ -214,12 +216,14 @@ class MainWindow(QMainWindow):
         
         # === BATCH PROCESSING BUTTON ===
         self.btn_batch_processing = QPushButton("📁 Batch Processing")
+        self.btn_batch_processing.setMinimumHeight(35)
         self.btn_batch_processing.setEnabled(False)
         self.btn_batch_processing.clicked.connect(self.open_batch_processing)
         layout.addWidget(self.btn_batch_processing)
         
         # === MODEL COMPARISON BUTTON ===
         self.btn_model_comparison = QPushButton("🔬 Model Comparison")
+        self.btn_model_comparison.setMinimumHeight(35)
         self.btn_model_comparison.clicked.connect(self.open_model_comparison)
         layout.addWidget(self.btn_model_comparison)
         
@@ -232,6 +236,7 @@ class MainWindow(QMainWindow):
         
         # === EXPORT MENU BUTTON ===
         self.btn_export = QPushButton("💾 Export Kết Quả")
+        self.btn_export.setMinimumHeight(35)
         self.btn_export.setEnabled(False)
         
         # Create export menu
@@ -329,10 +334,12 @@ class MainWindow(QMainWindow):
         # === LOG PANEL ===
         log_container = QGroupBox("Logs")
         log_layout = QVBoxLayout(log_container)
+        log_layout.setSpacing(4)  # Reduce spacing between elements
+        log_layout.setContentsMargins(8, 8, 8, 8)  # Balanced padding
         
         self.log_text = QTextEdit()
         self.log_text.setReadOnly(True)
-        self.log_text.setMaximumHeight(200)
+        self.log_text.setContentsMargins(0, 0, 0, 0)  # Remove internal margins
         log_layout.addWidget(self.log_text)
         
         layout.addWidget(log_container, stretch=1)
@@ -805,14 +812,10 @@ class MainWindow(QMainWindow):
         Open batch processing dialog
         (Open batch processing dialog)
         """
-        if not self.model_loader.is_model_loaded():
-            QMessageBox.warning(self, "No Model", "Please load a model first!")
-            return
-        
-        # Create and show batch dialog
+        # Create and show batch dialog (model can be None)
         dialog = BatchProcessDialog(
-            self.model_loader.get_model(),
-            self.model_loader.get_model_info(),
+            self.model_loader.get_model() if self.model_loader.is_model_loaded() else None,
+            self.model_loader.get_model_info() if self.model_loader.is_model_loaded() else None,
             self.conf_slider.value(),
             self.iou_slider.value(),
             self.device_selector.get_selected_device(),

@@ -22,7 +22,7 @@ class HistogramDialog(QDialog):
         super().__init__(parent)
         self.detections = detections
         self.setWindowTitle("Confidence Distribution Histogram")
-        self.setGeometry(200, 200, 800, 600)
+        self.setGeometry(200, 200, 900, 750)
         self.setup_ui()
     
     def setup_ui(self):
@@ -36,14 +36,20 @@ class HistogramDialog(QDialog):
         layout.addWidget(title)
         
         # Create matplotlib figure
-        self.figure = Figure(figsize=(10, 6))
+        self.figure = Figure(figsize=(11, 7))
         self.canvas = FigureCanvas(self.figure)
         layout.addWidget(self.canvas)
         
         # Statistics label
         self.stats_label = QLabel()
         self.stats_label.setWordWrap(True)
-        self.stats_label.setStyleSheet("padding: 10px; background-color: #F1F5F9; border-radius: 6px;")
+        self.stats_label.setStyleSheet(
+            "padding: 10px; "
+            "background-color: #F1F5F9; "
+            "color: #1E293B; "
+            "border-radius: 6px; "
+            "font-size: 13px;"
+        )
         layout.addWidget(self.stats_label)
         
         # Close button

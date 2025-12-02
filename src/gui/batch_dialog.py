@@ -12,6 +12,7 @@ from PyQt5.QtCore import Qt, QThread, pyqtSignal
 import os
 
 from src.core.batch_processor import BatchProcessor
+from src.core.model_loader import ModelLoader
 
 
 class BatchProcessingThread(QThread):
@@ -101,6 +102,21 @@ class BatchProcessDialog(QDialog):
         title.setAlignment(Qt.AlignCenter)
         layout.addWidget(title)
         
+        # === MODEL SECTION ===
+        model_group = QGroupBox("Model Configuration")
+        model_layout = QVBoxLayout(model_group)
+        
+        self.btn_load_model = QPushButton("🧠 Load Model")
+        self.btn_load_model.setMinimumHeight(35)
+        self.btn_load_model.clicked.connect(self.load_model)
+        model_layout.addWidget(self.btn_load_model)
+        
+        self.model_info_label = QLabel("No model loaded")
+        self.model_info_label.setStyleSheet("padding: 8px; background: #F1F5F9; border-radius: 4px; color: #64748B;")
+        model_layout.addWidget(self.model_info_label)
+        
+        layout.addWidget(model_group)
+        
         # === IMAGE SELECTION ===
         selection_group = QGroupBox("Image Selection")
         selection_layout = QVBoxLayout(selection_group)
@@ -109,14 +125,17 @@ class BatchProcessDialog(QDialog):
         btn_layout = QHBoxLayout()
         
         self.btn_add_images = QPushButton("➕ Add Images")
+        self.btn_add_images.setMinimumHeight(35)
         self.btn_add_images.clicked.connect(self.add_images)
         btn_layout.addWidget(self.btn_add_images)
         
         self.btn_add_folder = QPushButton("📁 Add Folder")
+        self.btn_add_folder.setMinimumHeight(35)
         self.btn_add_folder.clicked.connect(self.add_folder)
         btn_layout.addWidget(self.btn_add_folder)
         
         self.btn_clear = QPushButton("🗑️ Clear All")
+        self.btn_clear.setMinimumHeight(35)
         self.btn_clear.clicked.connect(self.clear_images)
         btn_layout.addWidget(self.btn_clear)
         
@@ -146,6 +165,7 @@ class BatchProcessDialog(QDialog):
         dir_layout.addWidget(self.output_dir_edit, stretch=1)
         
         btn_browse = QPushButton("Browse")
+        btn_browse.setMinimumHeight(35)
         btn_browse.clicked.connect(self.browse_output_dir)
         dir_layout.addWidget(btn_browse)
         
@@ -187,15 +207,53 @@ class BatchProcessDialog(QDialog):
         self.btn_start.setEnabled(False)
         self.btn_start.clicked.connect(self.start_processing)
         self.btn_start.setMinimumWidth(200)
-        self.btn_start.setMinimumHeight(40)
+        self.btn_start.setMinimumHeight(35)
         action_layout.addWidget(self.btn_start)
         
         self.btn_close = QPushButton("Close")
+        self.btn_close.setMinimumHeight(35)
         self.btn_close.clicked.connect(self.accept)
         self.btn_close.setMinimumWidth(100)
         action_layout.addWidget(self.btn_close)
         
         layout.addLayout(action_layout)
+    
+    def load_model(self):
+        """Load YOLO model"""
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Select YOLO Model",
+            "resources/models",
+            "PyTorch Model (*.pt);;All Files (*)"
+        )
+        
+        if not file_path:
+            return
+        
+        # Load model
+        model_loader = ModelLoader()
+        success = model_loader.load_model(file_path)
+        
+        if not success:
+            QMessageBox.critical(self, "Error", "Cannot load model!")
+            return
+        
+        # Update model and info
+        self.model = model_loader.get_model()
+        self.model_info = model_loader.get_model_info()
+        
+        # Update UI
+        self.model_info_label.setText(
+            f"✅ {self.model_info['name']} | "
+            f"{self.model_info['num_classes']} classes | "
+            f"{self.model_info['size_mb']} MB"
+        )
+        self.model_info_label.setStyleSheet(
+            "padding: 8px; background: #DBEAFE; border-radius: 4px; "
+            "color: #1E40AF; font-weight: bold;"
+        )
+        self.log(f"✅ Loaded model: {self.model_info['name']}")
+        self._update_ui()
     
     def add_images(self):
         """Add individual images"""
@@ -256,6 +314,10 @@ class BatchProcessDialog(QDialog):
     
     def start_processing(self):
         """Start batch processing"""
+        if not self.model:
+            QMessageBox.warning(self, "No Model", "Please load a model first!")
+            return
+        
         if not self.image_paths:
             QMessageBox.warning(self, "No Images", "Please add images first!")
             return
@@ -351,7 +413,8 @@ class BatchProcessDialog(QDialog):
     def _update_ui(self):
         """Update UI state"""
         self.label_count.setText(f"Images: {len(self.image_paths)}")
-        self.btn_start.setEnabled(len(self.image_paths) > 0)
+        # Enable start only if model loaded and images added
+        self.btn_start.setEnabled(self.model is not None and len(self.image_paths) > 0)
     
     def log(self, message: str):
         """Add message to log"""
