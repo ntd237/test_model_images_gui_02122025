@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QSplitter, QTableWidget, QTableWidgetItem,
     QTextEdit, QGroupBox, QFileDialog, QMessageBox,
-    QHeaderView, QLabel
+    QHeaderView, QLabel, QMenu
 )
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QFont
@@ -20,6 +20,9 @@ from src.core.model_loader import ModelLoader
 from src.core.inference import InferenceEngine
 from src.utils.image_utils import (
     load_image_cv, cv_to_qpixmap, validate_image_format, get_image_info
+)
+from src.utils.export_utils import (
+    export_to_json, export_to_csv, generate_pdf_report
 )
 
 
@@ -81,6 +84,8 @@ class MainWindow(QMainWindow):
         self.current_image = None
         self.current_image_path = None
         self.inference_thread = None
+        self.current_detections = []  # Store detections for export
+        self.current_inference_time = 0.0  # Store inference time
         
         # Setup UI
         self.setup_ui()
@@ -211,11 +216,19 @@ class MainWindow(QMainWindow):
         
         layout.addStretch()
         
-        # === SAVE BUTTON ===
-        self.btn_save_result = QPushButton("💾 Lưu Kết Quả")
-        self.btn_save_result.setEnabled(False)
-        self.btn_save_result.clicked.connect(self.save_result)
-        layout.addWidget(self.btn_save_result)
+        # === EXPORT MENU BUTTON ===
+        self.btn_export = QPushButton("💾 Export Kết Quả")
+        self.btn_export.setEnabled(False)
+        
+        # Create export menu
+        export_menu = QMenu(self)
+        export_menu.addAction("💾 Save Image", self.save_result_image)
+        export_menu.addAction("📄 Export JSON", self.export_json)
+        export_menu.addAction("📊 Export CSV", self.export_csv)
+        export_menu.addAction("📑 Generate PDF Report", self.export_pdf)
+        
+        self.btn_export.setMenu(export_menu)
+        layout.addWidget(self.btn_export)
         
         return panel
     
@@ -435,8 +448,10 @@ class MainWindow(QMainWindow):
         pixmap = cv_to_qpixmap(result['annotated_image'])
         self.result_image_label.setPixmap(pixmap)
         
-        # Store result for saving
+        # Store result for export
         self.current_result_image = result['annotated_image']
+        self.current_detections = result['detections']
+        self.current_inference_time = result['inference_time']
         
         # Update detections table
         self._update_detections_table(result['detections'])
@@ -459,8 +474,8 @@ class MainWindow(QMainWindow):
         self.btn_run_inference.setEnabled(True)
         self.btn_run_inference.setText("▶ Chạy Inference")
         
-        # Enable save button
-        self.btn_save_result.setEnabled(True)
+        # Enable export button
+        self.btn_export.setEnabled(True)
     
     def on_inference_error(self, error_msg: str):
         """
@@ -476,7 +491,8 @@ class MainWindow(QMainWindow):
         
         QMessageBox.critical(self, "Lỗi Inference", error_msg)
     
-    def save_result(self):
+    
+    def save_result_image(self):
         """Lưu kết quả ảnh đã annotate"""
         if not hasattr(self, 'current_result_image'):
             return
@@ -508,6 +524,114 @@ class MainWindow(QMainWindow):
                 "Lỗi",
                 "Không thể lưu file!"
             )
+    
+    def export_json(self):
+        """
+        Export detection results sang JSON
+        (Export detection results to JSON)
+        """
+        if not self.current_detections:
+            QMessageBox.warning(self, "No Data", "Chưa có kết quả inference!")
+            return
+        
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Export JSON",
+            "",
+            "JSON Files (*.json);;All Files (*)"
+        )
+        
+        if not file_path:
+            return
+        
+        # Export
+        success = export_to_json(
+            self.current_detections,
+            self.current_image_path,
+            self.model_loader.get_model_info(),
+            file_path,
+            self.current_inference_time
+        )
+        
+        if success:
+            self.log(f"📄 Exported to JSON: {os.path.basename(file_path)}")
+            QMessageBox.information(self, "Success", "Export JSON thành công!")
+        else:
+            QMessageBox.critical(self, "Error", "Không thể export JSON!")
+    
+    def export_csv(self):
+        """
+        Export detections table sang CSV
+        (Export detections table to CSV)
+        """
+        if not self.current_detections:
+            QMessageBox.warning(self, "No Data", "Chưa có kết quả inference!")
+            return
+        
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Export CSV",
+            "",
+            "CSV Files (*.csv);;All Files (*)"
+        )
+        
+        if not file_path:
+            return
+        
+        # Export
+        success = export_to_csv(self.current_detections, file_path)
+        
+        if success:
+            self.log(f"📊 Exported to CSV: {os.path.basename(file_path)}")
+            QMessageBox.information(self, "Success", "Export CSV thành công!")
+        else:
+            QMessageBox.critical(self, "Error", "Không thể export CSV!")
+    
+    def export_pdf(self):
+        """
+        Generate comprehensive PDF report
+        (Generate comprehensive PDF report)
+        """
+        if not self.current_detections or not hasattr(self, 'current_result_image'):
+            QMessageBox.warning(self, "No Data", "Chưa có kết quả inference!")
+            return
+        
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Generate PDF Report",
+            "",
+            "PDF Files (*.pdf);;All Files (*)"
+        )
+        
+        if not file_path:
+            return
+        
+        # Show progress message
+        self.log("📑 Generating PDF report...")
+        
+        # Get selected device
+        device = self.device_selector.get_selected_device()
+        
+        # Generate PDF
+        success = generate_pdf_report(
+            self.current_detections,
+            self.current_image_path,
+            self.current_result_image,
+            self.model_loader.get_model_info(),
+            file_path,
+            self.current_inference_time,
+            device
+        )
+        
+        if success:
+            self.log(f"📑 Generated PDF: {os.path.basename(file_path)}")
+            QMessageBox.information(
+                self,
+                "Success",
+                f"PDF report đã được tạo!\n{os.path.basename(file_path)}"
+            )
+        else:
+            QMessageBox.critical(self, "Error", "Không thể tạo PDF report!")
     
     # === HELPER METHODS ===
     
