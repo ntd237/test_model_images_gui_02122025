@@ -1,54 +1,127 @@
 # YOLO Model Testing Tool
 
-> Tool GUI chuyên nghiệp để test các YOLO models với image inference
+> **Công cụ GUI chuyên nghiệp để kiểm thử và đánh giá model YOLO với tính năng xử lý hàng loạt và báo cáo chi tiết.**
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
-![Python](https://img.shields.io/badge/python-3.8+-green)
-![License](https://img.shields.io/badge/license-MIT-orange)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
+[![YOLO](https://img.shields.io/badge/YOLO-Ultralytics-green)](https://github.com/ultralytics/ultralytics)
 
 ---
 
-## 📝 Mô Tả
+## 📚 Mục Lục
 
-YOLO Model Testing Tool là công cụ GUI được xây dựng với PyQt5, cho phép người dùng dễ dàng test các YOLO models (YOLOv8, YOLOv11, etc.) đã được finetune. Tool cung cấp giao diện trực quan để:
+- [Giới Thiệu](#giới-thiệu)
+- [Tính Năng](#tính-năng)
+- [Yêu Cầu Hệ Thống](#yêu-cầu-hệ-thống)
+- [Cài Đặt](#cài-đặt)
+- [Sử Dụng](#sử-dụng)
+- [Cấu Trúc Dự Án](#cấu-trúc-dự-án)
+- [Troubleshooting](#troubleshooting)
+- [License](#license)
+- [Liên Hệ](#liên-hệ)
 
-- ✅ Load và hiển thị ảnh test
-- ✅ Load YOLO models (định dạng .pt)
-- ✅ Chạy inference với confidence/IOU thresholds tùy chỉnh
-- ✅ Hiển thị kết quả side-by-side (ảnh gốc vs ảnh detected)
-- ✅ Xem chi tiết detections trong bảng
-- ✅ Lưu kết quả ảnh đã annotate
+---
 
-## 🎨 Giao Diện
+## 🎯 Giới Thiệu
 
-Tool sử dụng **Modern Dark Theme** với layout Master-Detail:
+### Vấn Đề
+Việc kiểm thử model YOLO sau khi training thường gặp nhiều khó khăn:
+- ❌ **Thủ công**: Phải chạy từng ảnh hoặc script dòng lệnh phức tạp.
+- ❌ **Khó so sánh**: Không có giao diện trực quan để so sánh ảnh gốc và kết quả.
+- ❌ **Thiếu báo cáo**: Khó tổng hợp kết quả thống kê cho hàng trăm ảnh.
 
-- **Left Panel**: Control panel với buttons và settings
-- **Center-Right Panel**: Split view hiển thị ảnh gốc và kết quả
-- **Bottom Panel**: Bảng detections và log panel
+### Giải Pháp
+**YOLO Model Testing Tool** cung cấp giải pháp toàn diện:
+- ✅ **GUI Trực quan**: Giao diện hiện đại, dễ sử dụng với Dark Theme.
+- ✅ **Batch Processing**: Xử lý hàng loạt thư mục ảnh với tốc độ cao.
+- ✅ **Báo cáo Tự động**: Xuất báo cáo PDF chuyên nghiệp với biểu đồ thống kê.
+
+### Công Nghệ
+Dự án được xây dựng với:
+- **Python 3.10+**: Ngôn ngữ chính.
+- **PyQt5**: Framework GUI mạnh mẽ.
+- **Ultralytics YOLO**: Engine nhận diện đối tượng state-of-the-art.
+- **ReportLab & Matplotlib**: Tạo báo cáo và biểu đồ.
+
+---
+
+## ✨ Tính Năng
+
+### Core Features
+- 🎯 **Single Image Inference**: Test nhanh từng ảnh, điều chỉnh threshold realtime.
+- 📁 **Batch Processing**: 
+  - Xử lý toàn bộ thư mục ảnh.
+  - Thanh tiến trình (Progress bar) và Log chi tiết.
+  - Hỗ trợ tạm dừng/tiếp tục.
+- ⚡ **GPU Support**: Tự động phát hiện và cho phép chọn thiết bị (CPU/CUDA).
+
+### Advanced Features
+- 📊 **Advanced Visualization**:
+  - Biểu đồ phân phối độ tin cậy (Confidence Distribution).
+  - Biểu đồ phân phối lớp (Class Distribution - Pie Chart).
+  - Click vào bảng kết quả để highlight bounding box trên ảnh.
+- 💾 **Export Options**:
+  - **PDF Report**: Báo cáo đầy đủ với biểu đồ và hình ảnh minh họa.
+  - **CSV/JSON**: Xuất dữ liệu thô để phân tích thêm.
+  - **Save Images**: Lưu ảnh kết quả hàng loạt.
+- 🔍 **Class Filtering**: Lọc kết quả hiển thị theo lớp đối tượng.
+
+---
+
+## 💻 Yêu Cầu Hệ Thống
+
+### Phần Cứng
+- **CPU**: Intel Core i5 hoặc tương đương.
+- **RAM**: Tối thiểu 8GB.
+- **GPU** (Khuyến nghị): NVIDIA GPU với CUDA support để tăng tốc độ xử lý.
+
+### Phần Mềm
+- **OS**: Windows 10/11, macOS, Linux.
+- **Python**: 3.10 trở lên.
+
+### Dependencies Chính
+```
+PyQt5>=5.15.0
+ultralytics>=8.0.0
+opencv-python>=4.8.0
+matplotlib>=3.7.0
+reportlab>=4.0.0
+numpy>=1.24.0
+```
+
+---
 
 ## 🚀 Cài Đặt
 
-### Yêu Cầu Hệ Thống
+### Bước 1: Clone Repository
 
-- Python 3.8 trở lên
-- Windows / Linux / macOS
-- (Optional) CUDA nếu muốn chạy inference trên GPU
+```bash
+git clone https://github.com/ntd237/test_model_images_gui_02122025.git
+cd test_model_images_gui_02122025
+```
 
-### Các Bước Cài Đặt
+### Bước 2: Tạo Virtual Environment
 
-1. **Clone hoặc download project**
+```bash
+python -m venv venv
+# Windows
+venv\Scripts\activate
+# macOS/Linux
+source venv/bin/activate
+```
 
-2. **Cài đặt dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
+### Bước 3: Install Dependencies
 
-3. **Chuẩn bị models và images**:
-   - Đặt YOLO models (.pt files) vào folder `resources/models/`
-   - Đặt ảnh test vào folder `resources/sample_images/` (optional)
+```bash
+pip install -r requirements.txt
+```
 
-## 📖 Hướng Dẫn Sử Dụng
+### Bước 4: Chuẩn bị Model
+Đặt các file model `.pt` của bạn vào thư mục `resources/models/` (tùy chọn).
+
+---
+
+## 📖 Sử Dụng
 
 ### Khởi Chạy Tool
 
@@ -56,131 +129,80 @@ Tool sử dụng **Modern Dark Theme** với layout Master-Detail:
 python main.py
 ```
 
-### Workflow Cơ Bản
+### Workflow Xử Lý Hàng Loạt (Batch Processing)
 
-1. **Load Ảnh**:
-   - Click nút "📁 Load Ảnh"
-   - Chọn ảnh từ file system
-   - Ảnh sẽ hiển thị trong panel "Ảnh Gốc"
+1. **Mở Batch Dialog**: Click nút "Batch Processing" trên giao diện chính.
+2. **Chọn Folder**: Chọn thư mục chứa ảnh cần test.
+3. **Load Model**: Chọn model YOLO (.pt).
+4. **Cấu Hình**:
+   - Chọn thiết bị (CPU/CUDA).
+   - Điều chỉnh Confidence và IOU Threshold.
+5. **Chạy**: Nhấn "Process All Images".
+6. **Xuất Báo Cáo**: Sau khi chạy xong, chọn "Export Kết Quả" -> "Export PDF".
 
-2. **Load Model**:
-   - Click nút "🧠 Load Model"
-   - Chọn file model .pt (mặc định tìm trong `resources/models/`)
-   - Thông tin model sẽ hiển thị
-
-3. **Cấu Hình Settings**:
-   - Điều chỉnh **Confidence Threshold** (default: 0.25)
-   - Điều chỉnh **IOU Threshold** (default: 0.45)
-
-4. **Chạy Inference**:
-   - Click nút "▶ Chạy Inference"
-   - Kết quả sẽ hiển thị trong panel "Kết Quả Inference"
-   - Xem chi tiết detections trong bảng bên dưới
-
-5. **Lưu Kết Quả** (Optional):
-   - Click nút "💾 Lưu Kết Quả"
-   - Chọn nơi lưu và format (JPG/PNG)
+---
 
 ## 📁 Cấu Trúc Dự Án
 
 ```
-test_model_imasge_gui_02122025/
-├── main.py                    # Entry point
-├── requirements.txt           # Dependencies
-├── README.md                  # Documentation (file này)
+test_model_images_gui_02122025/
+├── src/                          # Source code chính
+│   ├── core/                     # Core logic
+│   │   ├── __init__.py
+│   │   ├── batch_processor.py    # Xử lý hàng loạt (Batch Processing Logic)
+│   │   ├── inference.py          # Engine chạy model YOLO
+│   │   ├── model_loader.py       # Quản lý load model
+│   │   └── model_manager.py      # Quản lý so sánh nhiều model
+│   │
+│   ├── gui/                      # Giao diện người dùng
+│   │   ├── __init__.py
+│   │   ├── batch_dialog.py       # Hộp thoại xử lý hàng loạt
+│   │   ├── comparison_window.py  # Cửa sổ so sánh model
+│   │   ├── histogram_dialog.py   # Biểu đồ phân phối
+│   │   ├── main_window.py        # Cửa sổ chính
+│   │   ├── styles.py             # Stylesheet (Dark Theme)
+│   │   └── widgets.py            # Custom widgets (ImageLabel, InfoPanel...)
+│   │
+│   └── utils/                    # Các tiện ích
+│       ├── __init__.py
+│       ├── device_utils.py       # Tiện ích quản lý thiết bị (CPU/GPU)
+│       ├── export_utils.py       # Tiện ích xuất báo cáo (PDF, CSV, JSON)
+│       └── image_utils.py        # Xử lý ảnh (Resize, Draw BBox)
 │
-├── resources/                 # Resources folder
-│   ├── models/               # YOLO models (.pt files)
-│   ├── sample_images/        # Sample test images
-│   └── icons/                # UI icons
+├── resources/                    # Tài nguyên
+│   ├── models/                   # Chứa file model .pt
+│   ├── sample_images/            # Ảnh mẫu để test
+│   ├── output_images/            # Thư mục lưu kết quả mặc định
+│   └── icons/                    # Icons cho giao diện
 │
-└── src/                      # Source code
-    ├── __init__.py
-    │
-    ├── gui/                  # GUI components
-    │   ├── __init__.py
-    │   ├── main_window.py    # Main window implementation
-    │   ├── widgets.py        # Custom widgets
-    │   └── styles.py         # Qt stylesheets (dark theme)
-    │
-    ├── core/                 # Core logic
-    │   ├── __init__.py
-    │   ├── model_loader.py   # YOLO model loading
-    │   └── inference.py      # Inference engine
-    │
-    └── utils/                # Utilities
-        ├── __init__.py
-        └── image_utils.py    # Image processing utilities
+├── main.py                       # File khởi chạy ứng dụng
+├── requirements.txt              # Danh sách thư viện phụ thuộc
+└── README.md                     # Tài liệu hướng dẫn
 ```
 
-## 🔧 Dependencies
-
-- **PyQt5**: GUI framework
-- **ultralytics**: YOLO models support
-- **opencv-python**: Image processing
-- **numpy**: Numerical operations
-- **Pillow**: Image I/O
-
-Xem chi tiết trong `requirements.txt`.
-
-## 🎯 Tính Năng Nổi Bật
-
-### 1. Giao Diện Hiện Đại
-- Dark theme chuyên nghiệp
-- Layout trực quan, dễ sử dụng
-- Responsive design
-
-### 2. Inference Threading
-- Inference chạy trên thread riêng
-- UI không bị block trong khi xử lý
-- Real-time progress feedback
-
-### 3. Flexible Configuration
-- Điều chỉnh confidence threshold (0.0 - 1.0)
-- Điều chỉnh IOU threshold (0.0 - 1.0)
-- Sliders với real-time value display
-
-### 4. Detailed Results
-- Bảng detections với thông tin đầy đủ
-- Class name, confidence score, bounding box coordinates
-- Sortable table
-
-### 5. Model Support
-- Hỗ trợ tất cả YOLO models từ Ultralytics
-- YOLOv8n/s/m/l/x
-- YOLOv11n/s/m/l/x
-- Custom finetuned models
+---
 
 ## 🐛 Troubleshooting
 
 ### Lỗi "No module named 'PyQt5'"
 ```bash
-pip install PyQt5==5.15.10
+pip install PyQt5
 ```
 
-### Lỗi "No module named 'ultralytics'"
+### Lỗi khi xuất PDF
+Đảm bảo bạn đã cài đặt `reportlab`:
 ```bash
-pip install ultralytics>=8.0.0
+pip install reportlab
 ```
 
-### Model không load được
-- Kiểm tra file model có định dạng .pt
-- Đảm bảo model được train với Ultralytics YOLO
-- Kiểm tra model file không bị corrupt
+### Không nhận diện được GPU
+Kiểm tra cài đặt PyTorch với CUDA:
+```bash
+python -c "import torch; print(torch.cuda.is_available())"
+```
+Nếu trả về `False`, hãy cài lại PyTorch phiên bản hỗ trợ CUDA từ trang chủ pytorch.org.
 
-### Ảnh không hiển thị
-- Kiểm tra format ảnh (hỗ trợ: jpg, jpeg, png, bmp, tiff, webp)
-- Kiểm tra file ảnh không bị corrupt
-- Kiểm tra đường dẫn file
-
-## 📝 Notes
-
-- Tool mặc định chạy inference trên **CPU**
-- Nếu có CUDA, có thể modify `device='cuda'` trong `main_window.py`
-- Inference time phụ thuộc vào:
-  - Kích thước ảnh
-  - Model size (n/s/m/l/x)
-  - Hardware (CPU vs GPU)
+---
 
 ## 👤 Author
 
@@ -188,9 +210,11 @@ pip install ultralytics>=8.0.0
 - Email: ntd237.work@gmail.com
 - GitHub: [@ntd237](https://github.com/ntd237)
 
+---
+
 ## 📄 License
 
-MIT License - Free to use and modify
+Dự án này được phân phối dưới giấy phép [MIT License](LICENSE).
 
 ---
 
