@@ -1,0 +1,165 @@
+{
+  "timestamp": "2025-12-02T16:50:55.228234",
+  "statistics": {
+    "total_images": 4,
+    "processed_images": 4,
+    "failed_images": 0,
+    "success_rate": 100.0,
+    "total_detections": 11,
+    "avg_detections_per_image": 2.75,
+    "total_inference_time": 2.305208683013916,
+    "total_elapsed_time": 2.339071273803711,
+    "avg_time_per_image": 0.576302170753479
+  },
+  "results": [
+    {
+      "image_name": "image copy 2.png",
+      "num_detections": 7,
+      "inference_time": 2.047321081161499,
+      "detections": [
+        {
+          "class_id": 58,
+          "class_name": "potted plant",
+          "confidence": 0.881,
+          "bbox": [
+            339,
+            196,
+            478,
+            315
+          ]
+        },
+        {
+          "class_id": 57,
+          "class_name": "couch",
+          "confidence": 0.814,
+          "bbox": [
+            369,
+            269,
+            688,
+            460
+          ]
+        },
+        {
+          "class_id": 57,
+          "class_name": "couch",
+          "confidence": 0.678,
+          "bbox": [
+            0,
+            271,
+            290,
+            463
+          ]
+        },
+        {
+          "class_id": 56,
+          "class_name": "chair",
+          "confidence": 0.636,
+          "bbox": [
+            205,
+            254,
+            253,
+            278
+          ]
+        },
+        {
+          "class_id": 58,
+          "class_name": "potted plant",
+          "confidence": 0.593,
+          "bbox": [
+            202,
+            232,
+            233,
+            258
+          ]
+        },
+        {
+          "class_id": 58,
+          "class_name": "potted plant",
+          "confidence": 0.57,
+          "bbox": [
+            32,
+            232,
+            67,
+            271
+          ]
+        },
+        {
+          "class_id": 57,
+          "class_name": "couch",
+          "confidence": 0.565,
+          "bbox": [
+            0,
+            265,
+            698,
+            476
+          ]
+        }
+      ]
+    },
+    {
+      "image_name": "image copy 3.png",
+      "num_detections": 0,
+      "inference_time": 0.013448238372802734,
+      "detections": []
+    },
+    {
+      "image_name": "image copy.png",
+      "num_detections": 3,
+      "inference_time": 0.11820006370544434,
+      "detections": [
+        {
+          "class_id": 76,
+          "class_name": "scissors",
+          "confidence": 0.903,
+          "bbox": [
+            323,
+            89,
+            496,
+            297
+          ]
+        },
+        {
+          "class_id": 76,
+          "class_name": "scissors",
+          "confidence": 0.805,
+          "bbox": [
+            60,
+            78,
+            330,
+            312
+          ]
+        },
+        {
+          "class_id": 46,
+          "class_name": "banana",
+          "confidence": 0.617,
+          "bbox": [
+            445,
+            55,
+            499,
+            154
+          ]
+        }
+      ]
+    },
+    {
+      "image_name": "image.png",
+      "num_detections": 1,
+      "inference_time": 0.12623929977416992,
+      "detections": [
+        {
+          "class_id": 44,
+          "class_name": "spoon",
+          "confidence": 0.837,
+          "bbox": [
+            366,
+            559,
+            601,
+            653
+          ]
+        }
+      ]
+    }
+  ],
+  "failed": []
+}

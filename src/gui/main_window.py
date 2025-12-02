@@ -25,6 +25,7 @@ from src.utils.export_utils import (
     export_to_json, export_to_csv, generate_pdf_report
 )
 from src.gui.histogram_dialog import HistogramDialog
+from src.gui.batch_dialog import BatchProcessDialog
 
 
 class InferenceThread(QThread):
@@ -209,6 +210,12 @@ class MainWindow(QMainWindow):
         font.setBold(True)
         self.btn_run_inference.setFont(font)
         layout.addWidget(self.btn_run_inference)
+        
+        # === BATCH PROCESSING BUTTON ===
+        self.btn_batch_processing = QPushButton("📁 Batch Processing")
+        self.btn_batch_processing.setEnabled(False)
+        self.btn_batch_processing.clicked.connect(self.open_batch_processing)
+        layout.addWidget(self.btn_batch_processing)
         
         # === STATUS ===
         self.status_label = StatusLabel()
@@ -427,6 +434,9 @@ class MainWindow(QMainWindow):
         
         # Update status
         self._update_run_button_state()
+        
+        # Enable batch processing button
+        self.btn_batch_processing.setEnabled(True)
     
     def run_inference(self):
         """Chạy inference với model và ảnh hiện tại"""
@@ -782,6 +792,26 @@ class MainWindow(QMainWindow):
         
         # Create and show histogram dialog
         dialog = HistogramDialog(self.current_detections, self)
+        dialog.exec_()
+    
+    def open_batch_processing(self):
+        """
+        Open batch processing dialog
+        (Open batch processing dialog)
+        """
+        if not self.model_loader.is_model_loaded():
+            QMessageBox.warning(self, "No Model", "Please load a model first!")
+            return
+        
+        # Create and show batch dialog
+        dialog = BatchProcessDialog(
+            self.model_loader.get_model(),
+            self.model_loader.get_model_info(),
+            self.conf_slider.value(),
+            self.iou_slider.value(),
+            self.device_selector.get_selected_device(),
+            self
+        )
         dialog.exec_()
     
     def log(self, message: str):
