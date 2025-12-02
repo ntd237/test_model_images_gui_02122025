@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QSplitter, QTableWidget, QTableWidgetItem,
     QTextEdit, QGroupBox, QFileDialog, QMessageBox,
-    QHeaderView, QLabel, QMenu
+    QHeaderView, QLabel, QMenu, QComboBox
 )
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QFont
@@ -24,6 +24,7 @@ from src.utils.image_utils import (
 from src.utils.export_utils import (
     export_to_json, export_to_csv, generate_pdf_report
 )
+from src.gui.histogram_dialog import HistogramDialog
 
 
 class InferenceThread(QThread):
@@ -287,7 +288,29 @@ class MainWindow(QMainWindow):
         self.detections_table.setAlternatingRowColors(True)
         self.detections_table.setSelectionBehavior(QTableWidget.SelectRows)
         
+        # Connect row click event
+        self.detections_table.itemClicked.connect(self.on_detection_clicked)
+        
         table_layout.addWidget(self.detections_table)
+        
+        # Class filter and histogram button
+        filter_layout = QHBoxLayout()
+        
+        # Class filter
+        filter_layout.addWidget(QLabel("Filter:"))
+        self.class_filter_combo = QComboBox()
+        self.class_filter_combo.addItem("All Classes")
+        self.class_filter_combo.currentIndexChanged.connect(self.on_class_filter_changed)
+        filter_layout.addWidget(self.class_filter_combo, stretch=1)
+        
+        # Histogram button
+        self.btn_histogram = QPushButton("📊 Histogram")
+        self.btn_histogram.setEnabled(False)
+        self.btn_histogram.clicked.connect(self.show_histogram)
+        filter_layout.addWidget(self.btn_histogram)
+        
+        table_layout.addLayout(filter_layout)
+        
         layout.addWidget(table_container, stretch=2)
         
         # === LOG PANEL ===
@@ -476,6 +499,12 @@ class MainWindow(QMainWindow):
         
         # Enable export button
         self.btn_export.setEnabled(True)
+        
+        # Enable histogram button
+        self.btn_histogram.setEnabled(True)
+        
+        # Update class filter with detected classes
+        self._update_class_filter(result['detections'])
     
     def on_inference_error(self, error_msg: str):
         """
@@ -675,6 +704,85 @@ class MainWindow(QMainWindow):
             bbox2_item = QTableWidgetItem(f"({x2}, {y2})")
             bbox2_item.setTextAlignment(Qt.AlignCenter)
             self.detections_table.setItem(i, 3, bbox2_item)
+    
+    def _update_class_filter(self, detections: list):
+        """
+        Update class filter combo với các class đã detect
+        (Update class filter combo with detected classes)
+        """
+        # Clear current items (except "All Classes")
+        self.class_filter_combo.clear()
+        self.class_filter_combo.addItem("All Classes")
+        
+        # Get unique classes
+        unique_classes = set()
+        for det in detections:
+            unique_classes.add(det['class_name'])
+        
+        # Add to combo
+        for class_name in sorted(unique_classes):
+            self.class_filter_combo.addItem(class_name)
+    
+    def on_detection_clicked(self, item):
+        """
+        Handle detection table row click - highlight bbox
+        (Handle detection table row click - highlight bbox)
+        """
+        row = item.row()
+        
+        if row < 0 or row >= len(self.current_detections):
+            return
+        
+        # Get detection
+        detection = self.current_detections[row]
+        
+        # Log highlight
+        self.log(f"🎯 Highlighted: {detection['class_name']} (conf: {detection['confidence']:.3f})")
+        
+        # TODO: Implement bbox highlighting on image
+        # For now, just select the row
+        self.detections_table.selectRow(row)
+    
+    def on_class_filter_changed(self, index):
+        """
+        Handle class filter change - filter table
+        (Handle class filter change - filter table)
+        """
+        if index == 0:  # "All Classes"
+            # Show all rows
+            for row in range(self.detections_table.rowCount()):
+                self.detections_table.setRowHidden(row, False)
+            self.log("📋 Showing all classes")
+        else:
+            # Get selected class
+            selected_class = self.class_filter_combo.currentText()
+            
+            # Filter rows
+            hidden_count = 0
+            for row in range(self.detections_table.rowCount()):
+                class_item = self.detections_table.item(row, 0)
+                if class_item:
+                    class_name = class_item.text()
+                    should_hide = (class_name != selected_class)
+                    self.detections_table.setRowHidden(row, should_hide)
+                    if should_hide:
+                        hidden_count += 1
+            
+            visible_count = self.detections_table.rowCount() - hidden_count
+            self.log(f"🔍 Filtered to '{selected_class}' ({visible_count} detections)")
+    
+    def show_histogram(self):
+        """
+        Show confidence histogram popup dialog
+        (Show confidence histogram popup dialog)
+        """
+        if not self.current_detections:
+            QMessageBox.warning(self, "No Data", "Chưa có kết quả inference!")
+            return
+        
+        # Create and show histogram dialog
+        dialog = HistogramDialog(self.current_detections, self)
+        dialog.exec_()
     
     def log(self, message: str):
         """
