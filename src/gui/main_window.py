@@ -26,6 +26,7 @@ from src.utils.export_utils import (
 )
 from src.gui.histogram_dialog import HistogramDialog
 from src.gui.batch_dialog import BatchProcessDialog
+from src.gui.comparison_window import ModelComparisonWindow
 
 
 class InferenceThread(QThread):
@@ -216,6 +217,11 @@ class MainWindow(QMainWindow):
         self.btn_batch_processing.setEnabled(False)
         self.btn_batch_processing.clicked.connect(self.open_batch_processing)
         layout.addWidget(self.btn_batch_processing)
+        
+        # === MODEL COMPARISON BUTTON ===
+        self.btn_model_comparison = QPushButton("🔬 Model Comparison")
+        self.btn_model_comparison.clicked.connect(self.open_model_comparison)
+        layout.addWidget(self.btn_model_comparison)
         
         # === STATUS ===
         self.status_label = StatusLabel()
@@ -807,6 +813,20 @@ class MainWindow(QMainWindow):
         dialog = BatchProcessDialog(
             self.model_loader.get_model(),
             self.model_loader.get_model_info(),
+            self.conf_slider.value(),
+            self.iou_slider.value(),
+            self.device_selector.get_selected_device(),
+            self
+        )
+        dialog.exec_()
+    
+    def open_model_comparison(self):
+        """
+        Open model comparison window
+        (Open model comparison window)
+        """
+        # Create and show comparison window
+        dialog = ModelComparisonWindow(
             self.conf_slider.value(),
             self.iou_slider.value(),
             self.device_selector.get_selected_device(),
