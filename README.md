@@ -84,7 +84,7 @@ python main.py
 ## 📁 Cấu Trúc Dự Án
 
 ```
-test_model_images_web_02122025/
+test_model_imasge_gui_02122025/
 ├── main.py                    # Entry point
 ├── requirements.txt           # Dependencies
 ├── README.md                  # Documentation (file này)

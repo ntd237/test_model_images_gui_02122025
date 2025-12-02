@@ -15,7 +15,7 @@ from PyQt5.QtGui import QFont
 import cv2
 import numpy as np
 
-from src.gui.widgets import ImageLabel, InfoPanel, SliderWithLabel, StatusLabel
+from src.gui.widgets import ImageLabel, InfoPanel, SliderWithLabel, StatusLabel, DeviceSelector
 from src.core.model_loader import ModelLoader
 from src.core.inference import InferenceEngine
 from src.utils.image_utils import (
@@ -171,7 +171,7 @@ class MainWindow(QMainWindow):
             "Confidence Threshold:",
             min_value=0.0,
             max_value=1.0,
-            default_value=0.25,
+            default_value=0.5,
             decimals=2
         )
         settings_layout.addWidget(self.conf_slider)
@@ -185,6 +185,10 @@ class MainWindow(QMainWindow):
             decimals=2
         )
         settings_layout.addWidget(self.iou_slider)
+        
+        # Device selector
+        self.device_selector = DeviceSelector()
+        settings_layout.addWidget(self.device_selector)
         
         layout.addWidget(settings_group)
         
@@ -401,9 +405,13 @@ class MainWindow(QMainWindow):
         self.status_label.set_status("Đang chạy inference...", "info")
         self.log("🚀 Bắt đầu inference...")
         
-        # Get thresholds
+        # Get thresholds and device
         conf_threshold = self.conf_slider.value()
         iou_threshold = self.iou_slider.value()
+        selected_device = self.device_selector.get_selected_device()
+        
+        # Log device info
+        self.log(f"💻 Device: {selected_device}")
         
         # Start inference thread
         self.inference_thread = InferenceThread(
@@ -411,7 +419,7 @@ class MainWindow(QMainWindow):
             self.current_image,
             conf_threshold,
             iou_threshold,
-            device='cpu'
+            device=selected_device
         )
         
         self.inference_thread.finished.connect(self.on_inference_finished)

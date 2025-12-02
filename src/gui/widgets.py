@@ -5,7 +5,7 @@ Các widget tùy chỉnh với enhanced functionality
 
 from PyQt5.QtWidgets import (
     QLabel, QWidget, QVBoxLayout, QHBoxLayout,
-    QSlider, QFrame
+    QSlider, QFrame, QComboBox
 )
 from PyQt5.QtCore import Qt, pyqtSignal, QPoint
 from PyQt5.QtGui import QPixmap, QPainter, QColor
@@ -253,3 +253,125 @@ class StatusLabel(QLabel):
             background-color: {color}33;
             border-left: 3px solid {color};
         """)
+
+
+class DeviceSelector(QWidget):
+    """
+    Widget cho device selection (CPU/CUDA)
+    (Widget for device selection - CPU/CUDA)
+    """
+    
+    deviceChanged = pyqtSignal(str)  # Emit device_id khi thay đổi
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.devices = []
+        self.setup_ui()
+        self.refresh_devices()
+    
+    def setup_ui(self):
+        """Setup UI cho device selector"""
+        layout = QVBoxLayout(self)
+        layout.setSpacing(4)
+        layout.setContentsMargins(0, 0, 0, 0)
+        
+        # Label
+        label = QLabel("Device:")
+        layout.addWidget(label)
+        
+        # ComboBox
+        self.combo = QComboBox()
+        self.combo.currentIndexChanged.connect(self._on_device_changed)
+        layout.addWidget(self.combo)
+        
+        # Info label
+        self.info_label = QLabel()
+        self.info_label.setWordWrap(True)
+        self.info_label.setStyleSheet("color: #CBD5E1; font-size: 10px; padding: 4px;")
+        layout.addWidget(self.info_label)
+    
+    def refresh_devices(self):
+        """
+        Refresh danh sách devices available
+        (Refresh list of available devices)
+        """
+        from src.utils.device_utils import detect_available_devices, format_device_display_name
+        
+        self.devices = detect_available_devices()
+        
+        # Clear combo
+        self.combo.clear()
+        
+        # Add devices
+        for device in self.devices:
+            display_name = format_device_display_name(device)
+            self.combo.addItem(display_name, device['id'])
+        
+        # Set default to first CUDA device if available, else CPU
+        default_index = 0
+        for i, device in enumerate(self.devices):
+            if device['type'] == 'CUDA':
+                default_index = i
+                break
+        
+        self.combo.setCurrentIndex(default_index)
+        self._update_info_label()
+    
+    def _on_device_changed(self, index: int):
+        """
+        Handle device change
+        (Handle device change)
+        """
+        if index < 0 or index >= len(self.devices):
+            return
+        
+        device_id = self.devices[index]['id']
+        self._update_info_label()
+        self.deviceChanged.emit(device_id)
+    
+    def _update_info_label(self):
+        """
+        Update thông tin device hiện tại
+        (Update current device info)
+        """
+        index = self.combo.currentIndex()
+        if index < 0 or index >= len(self.devices):
+            return
+        
+        device = self.devices[index]
+        
+        if device['type'] == 'CPU':
+            info_text = "CPU mode - Slower but always available"
+        else:
+            memory = device['memory_gb']
+            compute = device['compute_capability']
+            info_text = f"{memory} GB | Compute {compute}"
+        
+        self.info_label.setText(info_text)
+    
+    def get_selected_device(self) -> str:
+        """
+        Lấy device ID hiện tại được select
+        (Get currently selected device ID)
+        
+        Returns:
+            Device ID string
+        """
+        index = self.combo.currentIndex()
+        if index < 0 or index >= len(self.devices):
+            return 'cpu'
+        
+        return self.devices[index]['id']
+    
+    def set_device(self, device_id: str):
+        """
+        Set device theo ID
+        (Set device by ID)
+        
+        Args:
+            device_id: Device ID to set
+        """
+        for i, device in enumerate(self.devices):
+            if device['id'] == device_id:
+                self.combo.setCurrentIndex(i)
+                break
