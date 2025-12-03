@@ -1,6 +1,6 @@
 # YOLO Model Testing Tool
 
-> **Công cụ GUI chuyên nghiệp để kiểm thử và đánh giá model YOLO với tính năng xử lý hàng loạt và báo cáo chi tiết.**
+> **Công cụ GUI để kiểm thử và đánh giá model YOLO với tính năng batch processing và xuất báo cáo chi tiết.**
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
@@ -65,6 +65,11 @@ Dự án được xây dựng với:
   - **CSV/JSON**: Xuất dữ liệu thô để phân tích thêm.
   - **Save Images**: Lưu ảnh kết quả hàng loạt.
 - 🔍 **Class Filtering**: Lọc kết quả hiển thị theo lớp đối tượng.
+- 🔬 **Model Comparison**: 
+  - So sánh đồng thời 2-4 models trên cùng ảnh test.
+  - Hiển thị side-by-side với 4 slots cố định.
+  - Bảng thống kê hiệu suất (inference time, FPS, detections).
+  - Giao diện tối ưu với spacing gọn gàng.
 
 ---
 
